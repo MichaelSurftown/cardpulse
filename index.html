@@ -2,18 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>CardPulse — Pokémon Market Heat Index</title>
+  <title>CardPulse — Pokémon Market Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Track real-time Pokémon card market momentum with CardPulse — the live Pokémon Market Heat Index powered by real pricing data." />
-  <meta property="og:title" content="CardPulse — Pokémon Market Heat Index" />
-  <meta property="og:description" content="Track real-time Pokémon card market momentum with CardPulse — the live Pokémon Market Heat Index powered by real pricing data." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/en/3/39/Pokeball.PNG" />
-  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/3/39/Pokeball.PNG" />
   <style>
     :root {
       --bg: #0f172a;
-      --card-bg: #020617;
+      --card-bg: #111827;
       --accent: #38bdf8;
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
@@ -26,106 +20,79 @@
       margin: 0;
       min-height: 100vh;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+      padding: 20px;
       background: radial-gradient(circle at top, #1f2937, #020617 60%);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text-main);
     }
-    .app { width: 100%; max-width: 520px; padding: 24px; }
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 1100px;
+    }
     .card {
-      background: radial-gradient(circle at top left, #111827, #020617 60%);
-      border-radius: 20px;
-      padding: 20px 18px;
+      flex: 1 1 320px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 18px;
       border: 1px solid var(--border-subtle);
-      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8);
+      box-shadow: 0 10px 30px rgba(15,23,42,0.6);
     }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      gap: 10px;
-    }
-    .title-group { display: flex; flex-direction: column; gap: 4px; }
-    .title { font-size: 18px; font-weight: 700; letter-spacing: 0.03em; }
-    .subtitle { font-size: 12px; color: var(--text-muted); }
-    .badge {
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.7);
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 16px;
       color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      white-space: nowrap;
     }
-    .heat-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 12px;
-      gap: 12px;
+    .heat-score {
+      font-size: 28px;
+      font-weight: 700;
     }
-    .heat-label { font-size: 16px; font-weight: 600; }
-    .heat-score { font-size: 26px; font-weight: 700; }
-    .heat-score.negative { color: var(--danger); }
     .heat-score.positive { color: var(--success); }
-    .bar-container {
-      position: relative; height: 10px; border-radius: 999px;
-      background: linear-gradient(90deg, #3b82f6 0%, #22c55e 50%, #f97316 75%, #ef4444 100%);
-      overflow: hidden; margin-bottom: 10px;
-    }
-    .bar-marker {
-      position: absolute; top: 0;
-      width: 4px; height: 100%;
-      background: #f9fafb;
-      box-shadow: 0 0 6px rgba(15, 23, 42, 0.9);
-      transform: translateX(-50%);
-    }
-    .bar-scale {
-      display: flex; justify-content: space-between;
-      font-size: 10px; color: var(--text-muted); margin-bottom: 12px;
-    }
-    .metrics-row {
-      display: flex; justify-content: space-between;
-      gap: 12px; margin-bottom: 10px; flex-wrap: wrap;
-    }
+    .heat-score.negative { color: var(--danger); }
     .metric {
-      flex: 1; min-width: 140px; padding: 8px 10px;
-      border-radius: 12px; background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(31, 41, 55, 0.9);
+      font-size: 13px;
+      margin-top: 4px;
+      color: var(--text-muted);
     }
-    .metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-    .metric-value { font-size: 14px; font-weight: 600; }
-    .footer {
-      font-size: 10px; color: var(--text-muted);
-      margin-top: 6px; display: flex;
-      justify-content: space-between; align-items: center;
-      gap: 8px; flex-wrap: wrap;
+    footer {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 10px;
+      text-align: center;
     }
-    .footer span { white-space: nowrap; }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div id="heat-card" class="card"></div>
+  <h1>CardPulse Pokémon Market Heat Dashboard</h1>
+  <div class="cards">
+    <div id="heat-1d" class="card"></div>
+    <div id="heat-7d" class="card"></div>
+    <div id="heat-30d" class="card"></div>
   </div>
+  <footer>Data updates live via Pokémon Price Tracker API — Powered by CardPulse</footer>
 
   <script>
-    // ✅ Your proxy-enabled API setup
-    const API_KEY = "pokeprice_free_765059273458a68929d5ecbcf0ed2206ed88f03b6d77a298";
-    const PROXY = "https://cardpulse-proxy.michael-e59.workers.dev/?url="; // 👈 your Worker URL
+    // 🔑 Your API connection
+    const PROXY = "https://cardpulse-proxy.michael-e59.workers.dev/?url=";
     const API_BASE = PROXY + "https://www.pokemonpricetracker.com";
-
-    const CARD_IDS = [
-      "base1-4", "base1-2", "base1-15", "surging-sparks-booster-box", "celebrations-etb"
-    ];
+    const CARD_IDS = ["base1-4","base1-2","base1-15","surging-sparks-booster-box","celebrations-etb"];
 
     async function apiGet(path) {
       const res = await fetch(API_BASE + path);
-      if (!res.ok) throw new Error("API error: " + res.status);
+      if (!res.ok) throw new Error("API error " + res.status);
       return res.json();
     }
 
@@ -144,125 +111,68 @@
       try {
         const data = await apiGet(path);
         return data.history || data || [];
-      } catch {
-        return [];
-      }
+      } catch { return []; }
     }
 
-    function extractMarket(entry) {
-      if (entry?.tcgplayer?.market) return entry.tcgplayer.market;
-      if (entry?.price) return entry.price;
-      return null;
-    }
+    function extractMarket(e){return e?.tcgplayer?.market ?? e?.price ?? null;}
 
-    async function getCardStats(id) {
+    async function getCardStats(id, days) {
       const current = await fetchCurrentPrice(id);
-      const history = await fetchHistory(id);
-      let oldPrice = null;
-      let latestPrice = current.currentPrice;
-
+      const history = await fetchHistory(id, days);
+      let oldPrice = null, latest = current.currentPrice;
       if (history.length > 1) {
         const first = extractMarket(history[0]);
         const last = extractMarket(history[history.length - 1]);
         oldPrice = typeof first === "number" ? first : null;
-        if (typeof last === "number") latestPrice = last;
+        if (typeof last === "number") latest = last;
       }
-
       let changePct = 0;
-      if (oldPrice && latestPrice) {
-        changePct = ((latestPrice - oldPrice) / oldPrice) * 100;
-      }
-
+      if (oldPrice && latest) changePct = ((latest - oldPrice) / oldPrice) * 100;
       return { id, currentPrice: current.currentPrice, changePct };
     }
 
     function calcHeat(cards) {
-      const valid = cards.filter(c =>
-        typeof c.changePct === "number" &&
-        !Number.isNaN(c.changePct) &&
-        typeof c.currentPrice === "number"
-      );
-
-      if (!valid.length) {
-        return {
-          score: 0, label: "Neutral", momentumPercent: 0,
-          breadthPercentUp: 50, updatedAt: new Date().toISOString(), basketSize: 0
-        };
-      }
-
-      let total = 0, up = 0;
-      valid.forEach(c => { total += c.changePct; if (c.changePct > 0) up++; });
-
-      const avg = total / valid.length;
-      const breadth = (up / valid.length) * 100;
-      const breadthScore = ((breadth - 50) / 50) * 100;
-      const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
-      const momentumScore = clamp(avg, -20, 20) * 5;
-      const score = Math.round(0.5 * breadthScore + 0.5 * momentumScore);
-
-      let label = "Neutral";
-      if (score <= -40) label = "Ice Cold";
-      else if (score <= -10) label = "Cool";
-      else if (score < 10) label = "Neutral";
-      else if (score < 40) label = "Warm";
-      else label = "On Fire";
-
-      return {
-        score, label,
-        momentumPercent: Number(avg.toFixed(2)),
-        breadthPercentUp: Number(breadth.toFixed(2)),
-        basketSize: valid.length,
-        updatedAt: new Date().toISOString()
-      };
+      const valid = cards.filter(c => typeof c.changePct === "number" && !Number.isNaN(c.changePct));
+      if (!valid.length) return {score:0,label:"Neutral",momentum:0,breadth:50};
+      let total=0,up=0;
+      valid.forEach(c=>{total+=c.changePct;if(c.changePct>0)up++;});
+      const avg=total/valid.length, breadth=(up/valid.length)*100;
+      const breadthScore=((breadth-50)/50)*100;
+      const momentumScore=Math.min(Math.max(avg,-20),20)*5;
+      const score=Math.round(0.5*breadthScore+0.5*momentumScore);
+      let label="Neutral";
+      if(score<=-40)label="Ice Cold";else if(score<=-10)label="Cool";
+      else if(score<10)label="Neutral";else if(score<40)label="Warm";else label="On Fire";
+      return {score,label,momentum:avg.toFixed(2),breadth:breadth.toFixed(2)};
     }
 
-    function render(containerId, data) {
-      const el = document.getElementById(containerId);
-      const {score, label, momentumPercent, breadthPercentUp, updatedAt, basketSize} = data;
-      const scoreClass = score > 5 ? "heat-score positive" :
-                         score < -5 ? "heat-score negative" : "heat-score";
-      const pct = ((Math.min(Math.max(score, -100), 100) + 100) / 2).toFixed(1);
-      const date = new Date(updatedAt);
-      const updated = date.toLocaleDateString(undefined, {month:"short", day:"numeric", year:"numeric"});
-
-      el.innerHTML = `
-        <div class="card-header">
-          <div class="title-group">
-            <div class="title">CardPulse Market Heat Index</div>
-            <div class="subtitle">Live Pokémon card sentiment tracker</div>
-          </div>
-          <div class="badge">Live</div>
-        </div>
-        <div class="heat-row">
-          <div class="heat-label">${label}</div>
-          <div class="${scoreClass}">${score}</div>
-        </div>
-        <div class="bar-container"><div class="bar-marker" style="left:${pct}%;"></div></div>
-        <div class="bar-scale"><span>Ice Cold</span><span>Neutral</span><span>On Fire</span></div>
-        <div class="metrics-row">
-          <div class="metric"><div class="metric-label">Avg 30d Move</div><div class="metric-value">${momentumPercent>0?"+":""}${momentumPercent}%</div></div>
-          <div class="metric"><div class="metric-label">Up Trend Cards</div><div class="metric-value">${breadthPercentUp}%</div></div>
-        </div>
-        <div class="footer"><span>Basket: ${basketSize} items</span><span>Updated ${updated}</span></div>
-      `;
+    function render(containerId, label, data){
+      const el=document.getElementById(containerId);
+      const cls=data.score>5?"heat-score positive":data.score<-5?"heat-score negative":"heat-score";
+      el.innerHTML=`
+        <h2>${label}</h2>
+        <div class="${cls}">${data.score} — ${data.label}</div>
+        <div class="metric">Avg Move: ${data.momentum>0?"+":""}${data.momentum}%</div>
+        <div class="metric">Cards Trending Up: ${data.breadth}%</div>`;
     }
 
-    async function init() {
-      const el = document.getElementById("heat-card");
-      el.innerHTML = "<div style='font-size:12px;color:#9ca3af;'>Loading live Pokémon market...</div>";
-      try {
-        const stats = await Promise.all(CARD_IDS.map(getCardStats));
-        const heat = calcHeat(stats);
-        render("heat-card", heat);
-      } catch (err) {
-        console.error(err);
-        el.innerHTML = "<div style='color:#ef4444;font-size:12px;'>Failed to load market data.</div>";
+    async function buildDashboard(){
+      try{
+        const [stats1,stats7,stats30] = await Promise.all([
+          Promise.all(CARD_IDS.map(id=>getCardStats(id,1))),
+          Promise.all(CARD_IDS.map(id=>getCardStats(id,7))),
+          Promise.all(CARD_IDS.map(id=>getCardStats(id,30)))
+        ]);
+        render("heat-1d","🔥 1-Day Heat Index",calcHeat(stats1));
+        render("heat-7d","📅 7-Day Heat Index",calcHeat(stats7));
+        render("heat-30d","📈 30-Day Heat Index",calcHeat(stats30));
+      }catch(e){
+        document.body.innerHTML="<p style='color:#ef4444'>Failed to load market data.</p>";
+        console.error(e);
       }
     }
 
-    document.readyState === "loading"
-      ? document.addEventListener("DOMContentLoaded", init)
-      : init();
+    buildDashboard();
   </script>
 </body>
 </html>
