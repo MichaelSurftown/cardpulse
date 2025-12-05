@@ -1,178 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>CardPulse — Pokémon Market Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card-bg: #111827;
-      --accent: #38bdf8;
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-      --border-subtle: #1f2937;
-      --danger: #ef4444;
-      --success: #22c55e;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 20px;
-      padding: 20px;
-      background: radial-gradient(circle at top, #1f2937, #020617 60%);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text-main);
-    }
-    h1 {
-      font-size: 20px;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-    .cards {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      width: 100%;
-      max-width: 1100px;
-    }
-    .card {
-      flex: 1 1 320px;
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 18px;
-      border: 1px solid var(--border-subtle);
-      box-shadow: 0 10px 30px rgba(15,23,42,0.6);
-    }
-    .card h2 {
-      margin: 0 0 8px;
-      font-size: 16px;
-      color: var(--accent);
-    }
-    .heat-score {
-      font-size: 28px;
-      font-weight: 700;
-    }
-    .heat-score.positive { color: var(--success); }
-    .heat-score.negative { color: var(--danger); }
-    .metric {
-      font-size: 13px;
-      margin-top: 4px;
-      color: var(--text-muted);
-    }
-    footer {
-      font-size: 10px;
-      color: var(--text-muted);
-      margin-top: 10px;
-      text-align: center;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CardPulse — Pokémon Market Mood</title>
+<style>
+  :root {
+    --fire: #f87171;
+    --warm: #facc15;
+    --neutral: #f9fafb;
+    --cool: #60a5fa;
+    --ice: #38bdf8;
+    --text-main: #f9fafb;
+  }
+  * {box-sizing:border-box;margin:0;padding:0;}
+  body {
+    font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background: radial-gradient(circle at top, #dc2626, #7c2d12 70%);
+    min-height:100vh;
+    color:var(--text-main);
+    display:flex;flex-direction:column;align-items:center;
+    justify-content:flex-start;padding:20px;gap:20px;
+    animation: bgpulse 15s infinite alternate;
+  }
+  @keyframes bgpulse {
+    from {background: radial-gradient(circle at top, #dc2626, #7c2d12 70%);}
+    to {background: radial-gradient(circle at top, #f59e0b, #b45309 70%);}
+  }
+  h1 {font-size:24px;font-weight:700;text-align:center;}
+  .cards {display:flex;flex-wrap:wrap;gap:20px;justify-content:center;width:100%;max-width:1100px;}
+  .card {
+    flex:1 1 300px;
+    background:rgba(0,0,0,0.3);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:16px;
+    padding:20px;
+    box-shadow:0 0 20px rgba(0,0,0,0.4);
+    position:relative;
+    overflow:hidden;
+  }
+  .card::after {
+    content:"";
+    position:absolute;top:0;left:0;width:100%;height:100%;
+    background: radial-gradient(circle at top, rgba(255,255,255,0.15), transparent 70%);
+    opacity:0;transition:opacity .6s;
+  }
+  .card.pulse::after {opacity:1;}
+  .label {font-size:16px;font-weight:600;margin-bottom:6px;}
+  .score {font-size:28px;font-weight:700;}
+  .emoji {font-size:24px;margin-left:6px;}
+  .bar {
+    height:10px;border-radius:6px;margin:10px 0;
+    background:linear-gradient(90deg,#60a5fa 0%,#facc15 50%,#f87171 100%);
+    position:relative;
+  }
+  .marker {
+    position:absolute;top:0;width:4px;height:100%;
+    background:#fff;border-radius:2px;transform:translateX(-50%);
+  }
+  .metric {font-size:13px;color:#e5e7eb;margin-bottom:4px;}
+  .top-movers {width:100%;max-width:700px;background:rgba(0,0,0,0.3);padding:12px 20px;border-radius:12px;}
+  .top-movers h2 {font-size:16px;margin-bottom:8px;}
+  .mover {font-size:13px;margin-bottom:4px;}
+  .up {color:#4ade80;} .down {color:#f87171;}
+  .share-btn {
+    margin-top:10px;padding:8px 14px;
+    background:#facc15;color:#000;
+    border:none;border-radius:6px;font-weight:600;cursor:pointer;
+  }
+  footer {font-size:10px;color:#e5e7eb;margin-top:10px;text-align:center;}
+</style>
 </head>
 <body>
-  <h1>CardPulse Pokémon Market Heat Dashboard</h1>
+  <h1>CardPulse — Pokémon Market Mood</h1>
   <div class="cards">
-    <div id="heat-1d" class="card"></div>
-    <div id="heat-7d" class="card"></div>
-    <div id="heat-30d" class="card"></div>
+    <div id="card1d" class="card"></div>
+    <div id="card7d" class="card"></div>
+    <div id="card30d" class="card"></div>
   </div>
-  <footer>Data updates live via Pokémon Price Tracker API — Powered by CardPulse</footer>
+  <div class="top-movers">
+    <h2>🏆 Top Movers (24h)</h2>
+    <div id="movers"></div>
+  </div>
+  <button class="share-btn" id="share">📣 Share Market Mood</button>
+  <footer>Auto-refreshes every 5 minutes — Powered by CardPulse</footer>
 
-  <script>
-    // 🔑 Your API connection
-    const PROXY = "https://cardpulse-proxy.michael-e59.workers.dev/?url=";
-    const API_BASE = PROXY + "https://www.pokemonpricetracker.com";
-    const CARD_IDS = ["base1-4","base1-2","base1-15","surging-sparks-booster-box","celebrations-etb"];
+<script>
+const PROXY = "https://cardpulse-proxy.michael-e59.workers.dev/?url=";
+const API_BASE = PROXY + "https://www.pokemonpricetracker.com";
+const CARD_IDS = ["base1-4","base1-2","base1-15","surging-sparks-booster-box","celebrations-etb"];
 
-    async function apiGet(path) {
-      const res = await fetch(API_BASE + path);
-      if (!res.ok) throw new Error("API error " + res.status);
-      return res.json();
-    }
+async function apiGet(path){
+  const res = await fetch(API_BASE + path);
+  if(!res.ok)throw new Error("API error "+res.status);
+  return res.json();
+}
+async function fetchCurrentPrice(id){
+  const d = await apiGet(`/api/prices?id=${encodeURIComponent(id)}`);
+  const m = d?.prices?.tcgplayer?.market ?? d?.prices?.cardmarket?.trend ?? null;
+  return {id,current:typeof m==="number"?m:null};
+}
+async function fetchHistory(id,days){
+  const e=new Date(),s=new Date();s.setDate(e.getDate()-days);
+  const toISO=d=>d.toISOString().slice(0,10);
+  const path=`/api/cards/${encodeURIComponent(id)}/history?startDate=${toISO(s)}&endDate=${toISO(e)}`;
+  try{return (await apiGet(path)).history||[]}catch{return[];}
+}
+function extractMarket(e){return e?.tcgplayer?.market??e?.price??null;}
+async function getCardStats(id,days){
+  const cur=await fetchCurrentPrice(id);
+  const hist=await fetchHistory(id,days);
+  let old=null,last=cur.current;
+  if(hist.length>1){
+    const first=extractMarket(hist[0]);
+    const l=extractMarket(hist[hist.length-1]);
+    old=typeof first==="number"?first:null;
+    if(typeof l==="number")last=l;
+  }
+  let pct=0;if(old&&last)pct=((last-old)/old)*100;
+  return {id,change:pct,price:cur.current};
+}
+function calcHeat(cards){
+  const valid=cards.filter(c=>!isNaN(c.change));
+  if(!valid.length)return{score:0,label:"Neutral",avg:0,breadth:0};
+  let total=0,up=0;
+  valid.forEach(c=>{total+=c.change;if(c.change>0)up++;});
+  const avg=total/valid.length,breadth=(up/valid.length)*100;
+  const score=Math.round((avg*2)+(breadth-50));
+  let label="Neutral";
+  if(score<=-40)label="Ice Cold";else if(score<=-10)label="Cool";
+  else if(score<10)label="Neutral";else if(score<40)label="Warm";else label="On Fire";
+  return{score,label,avg,breadth};
+}
+function emoji(label){
+  return label==="On Fire"?"🔥":label==="Warm"?"☀️":label==="Cool"?"❄️":label==="Ice Cold"?"🧊":"😐";
+}
+function renderCard(id,title,data){
+  const el=document.getElementById(id);
+  const cls=data.score>5?"positive":data.score<-5?"negative":"";
+  const pct=((Math.min(Math.max(data.score,-100),100)+100)/2).toFixed(1);
+  el.classList.remove("pulse");void el.offsetWidth;el.classList.add("pulse");
+  el.innerHTML=`
+    <div class="label">${title}</div>
+    <div class="score ${cls}">${data.score} ${emoji(data.label)}</div>
+    <div class="bar"><div class="marker" style="left:${pct}%"></div></div>
+    <div class="metric">Avg Move: ${data.avg.toFixed(2)}%</div>
+    <div class="metric">Cards Up: ${data.breadth.toFixed(1)}%</div>`;
+}
+async function build(){
+  try{
+    const [stats1,stats7,stats30] = await Promise.all([
+      Promise.all(CARD_IDS.map(i=>getCardStats(i,1))),
+      Promise.all(CARD_IDS.map(i=>getCardStats(i,7))),
+      Promise.all(CARD_IDS.map(i=>getCardStats(i,30)))
+    ]);
+    renderCard("card1d","🔥 1-Day Heat Index",calcHeat(stats1));
+    renderCard("card7d","📅 7-Day Heat Index",calcHeat(stats7));
+    renderCard("card30d","📈 30-Day Heat Index",calcHeat(stats30));
 
-    async function fetchCurrentPrice(cardId) {
-      const data = await apiGet(`/api/prices?id=${encodeURIComponent(cardId)}`);
-      const market = data?.prices?.tcgplayer?.market ?? data?.prices?.cardmarket?.trend ?? null;
-      return { id: cardId, currentPrice: typeof market === "number" ? market : null };
-    }
-
-    async function fetchHistory(cardId, days = 30) {
-      const end = new Date();
-      const start = new Date();
-      start.setDate(end.getDate() - days);
-      const toISO = d => d.toISOString().slice(0,10);
-      const path = `/api/cards/${encodeURIComponent(cardId)}/history?startDate=${toISO(start)}&endDate=${toISO(end)}`;
-      try {
-        const data = await apiGet(path);
-        return data.history || data || [];
-      } catch { return []; }
-    }
-
-    function extractMarket(e){return e?.tcgplayer?.market ?? e?.price ?? null;}
-
-    async function getCardStats(id, days) {
-      const current = await fetchCurrentPrice(id);
-      const history = await fetchHistory(id, days);
-      let oldPrice = null, latest = current.currentPrice;
-      if (history.length > 1) {
-        const first = extractMarket(history[0]);
-        const last = extractMarket(history[history.length - 1]);
-        oldPrice = typeof first === "number" ? first : null;
-        if (typeof last === "number") latest = last;
-      }
-      let changePct = 0;
-      if (oldPrice && latest) changePct = ((latest - oldPrice) / oldPrice) * 100;
-      return { id, currentPrice: current.currentPrice, changePct };
-    }
-
-    function calcHeat(cards) {
-      const valid = cards.filter(c => typeof c.changePct === "number" && !Number.isNaN(c.changePct));
-      if (!valid.length) return {score:0,label:"Neutral",momentum:0,breadth:50};
-      let total=0,up=0;
-      valid.forEach(c=>{total+=c.changePct;if(c.changePct>0)up++;});
-      const avg=total/valid.length, breadth=(up/valid.length)*100;
-      const breadthScore=((breadth-50)/50)*100;
-      const momentumScore=Math.min(Math.max(avg,-20),20)*5;
-      const score=Math.round(0.5*breadthScore+0.5*momentumScore);
-      let label="Neutral";
-      if(score<=-40)label="Ice Cold";else if(score<=-10)label="Cool";
-      else if(score<10)label="Neutral";else if(score<40)label="Warm";else label="On Fire";
-      return {score,label,momentum:avg.toFixed(2),breadth:breadth.toFixed(2)};
-    }
-
-    function render(containerId, label, data){
-      const el=document.getElementById(containerId);
-      const cls=data.score>5?"heat-score positive":data.score<-5?"heat-score negative":"heat-score";
-      el.innerHTML=`
-        <h2>${label}</h2>
-        <div class="${cls}">${data.score} — ${data.label}</div>
-        <div class="metric">Avg Move: ${data.momentum>0?"+":""}${data.momentum}%</div>
-        <div class="metric">Cards Trending Up: ${data.breadth}%</div>`;
-    }
-
-    async function buildDashboard(){
-      try{
-        const [stats1,stats7,stats30] = await Promise.all([
-          Promise.all(CARD_IDS.map(id=>getCardStats(id,1))),
-          Promise.all(CARD_IDS.map(id=>getCardStats(id,7))),
-          Promise.all(CARD_IDS.map(id=>getCardStats(id,30)))
-        ]);
-        render("heat-1d","🔥 1-Day Heat Index",calcHeat(stats1));
-        render("heat-7d","📅 7-Day Heat Index",calcHeat(stats7));
-        render("heat-30d","📈 30-Day Heat Index",calcHeat(stats30));
-      }catch(e){
-        document.body.innerHTML="<p style='color:#ef4444'>Failed to load market data.</p>";
-        console.error(e);
-      }
-    }
-
-    buildDashboard();
-  </script>
+    // top movers (24h)
+    const sorted=[...stats1].sort((a,b)=>b.change-a.change);
+    const top=sorted.slice(0,3),low=sorted.slice(-3).reverse();
+    const moverDiv=document.getElementById("movers");
+    moverDiv.innerHTML=
+      top.map(c=>`<div class="mover up">⬆️ ${c.id}: +${c.change.toFixed(2)}%</div>`).join("")+
+      low.map(c=>`<div class="mover down">⬇️ ${c.id}: ${c.change.toFixed(2)}%</div>`).join("");
+  }catch(e){
+    console.error(e);
+  }
+}
+document.getElementById("share").addEventListener("click",()=>{
+  const url=encodeURIComponent(window.location.href);
+  const text=encodeURIComponent("Check out the Pokémon Market Mood on CardPulse!");
+  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`,"_blank");
+});
+build();
+setInterval(build,5*60*1000);
+</script>
 </body>
 </html>
