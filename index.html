@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CardPulse — Pokémon Market Heat Index</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Track real-time Pokémon card market momentum with CardPulse — the live Pokémon Market Heat Index powered by real pricing data." />
+  <meta property="og:title" content="CardPulse — Pokémon Market Heat Index" />
+  <meta property="og:description" content="Track real-time Pokémon card market momentum with CardPulse — the live Pokémon Market Heat Index powered by real pricing data." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/en/3/39/Pokeball.PNG" />
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/3/39/Pokeball.PNG" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: #1f2937;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at top, #1f2937, #020617 60%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text-main);
+    }
+    .app { width: 100%; max-width: 520px; padding: 24px; }
+    .card {
+      background: radial-gradient(circle at top left, #111827, #020617 60%);
+      border-radius: 20px;
+      padding: 20px 18px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 10px;
+    }
+    .title-group { display: flex; flex-direction: column; gap: 4px; }
+    .title { font-size: 18px; font-weight: 700; letter-spacing: 0.03em; }
+    .subtitle { font-size: 12px; color: var(--text-muted); }
+    .badge {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.7);
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    .heat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+    .heat-label { font-size: 16px; font-weight: 600; }
+    .heat-score { font-size: 26px; font-weight: 700; }
+    .heat-score.negative { color: var(--danger); }
+    .heat-score.positive { color: var(--success); }
+    .bar-container {
+      position: relative; height: 10px; border-radius: 999px;
+      background: linear-gradient(90deg, #3b82f6 0%, #22c55e 50%, #f97316 75%, #ef4444 100%);
+      overflow: hidden; margin-bottom: 10px;
+    }
+    .bar-marker {
+      position: absolute; top: 0;
+      width: 4px; height: 100%;
+      background: #f9fafb;
+      box-shadow: 0 0 6px rgba(15, 23, 42, 0.9);
+      transform: translateX(-50%);
+    }
+    .bar-scale {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--text-muted); margin-bottom: 12px;
+    }
+    .metrics-row {
+      display: flex; justify-content: space-between;
+      gap: 12px; margin-bottom: 10px; flex-wrap: wrap;
+    }
+    .metric {
+      flex: 1; min-width: 140px; padding: 8px 10px;
+      border-radius: 12px; background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(31, 41, 55, 0.9);
+    }
+    .metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+    .metric-value { font-size: 14px; font-weight: 600; }
+    .footer {
+      font-size: 10px; color: var(--text-muted);
+      margin-top: 6px; display: flex;
+      justify-content: space-between; align-items: center;
+      gap: 8px; flex-wrap: wrap;
+    }
+    .footer span { white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div id="heat-card" class="card"></div>
+  </div>
+
+  <script>
+    // Your API key and proxy-enabled setup
+    const API_KEY = "pokeprice_free_765059273458a68929d5ecbcf0ed2206ed88f03b6d77a298";
+    const PROXY = "https://corsproxy.io/?";
+    const API_BASE = PROXY + "https://www.pokemonpricetracker.com";
+
+    const CARD_IDS = [
+      "base1-4", "base1-2", "base1-15", "surging-sparks-booster-box", "celebrations-etb"
+    ];
+
+    async function apiGet(path) {
+      const res = await fetch(API_BASE + path, {
+        headers: { "X-API-Key": API_KEY }
+      });
+      if (!res.ok) throw new Error("API error: " + res.status);
+      return res.json();
+    }
+
+    async function fetchCurrentPrice(cardId) {
+      const data = await apiGet(`/api/prices?id=${encodeURIComponent(cardId)}`);
+      const market = data?.prices?.tcgplayer?.market ?? data?.prices?.cardmarket?.trend ?? null;
+      return { id: cardId, currentPrice: typeof market === "number" ? market : null };
+    }
+
+    async function fetchHistory(cardId, days = 30) {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(end.getDate() - days);
+      const toISO = d => d.toISOString().slice(0,10);
+      const path = `/api/cards/${encodeURIComponent(cardId)}/history?startDate=${toISO(start)}&endDate=${toISO(end)}`;
+      try {
+        const data = await apiGet(path);
+        return data.history || data || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function extractMarket(entry) {
+      if (entry?.tcgplayer?.market) return entry.tcgplayer.market;
+      if (entry?.price) return entry.price;
+      return null;
+    }
+
+    async function getCardStats(id) {
+      const current = await fetchCurrentPrice(id);
+      const history = await fetchHistory(id);
+      let oldPrice = null;
+      let latestPrice = current.currentPrice;
+
+      if (history.length > 1) {
+        const first = extractMarket(history[0]);
+        const last = extractMarket(history[history.length - 1]);
+        oldPrice = typeof first === "number" ? first : null;
+        if (typeof last === "number") latestPrice = last;
+      }
+
+      let changePct = 0;
+      if (oldPrice && latestPrice) {
+        changePct = ((latestPrice - oldPrice) / oldPrice) * 100;
+      }
+
+      return { id, currentPrice: current.currentPrice, changePct };
+    }
+
+    function calcHeat(cards) {
+      const valid = cards.filter(c =>
+        typeof c.changePct === "number" &&
+        !Number.isNaN(c.changePct) &&
+        typeof c.currentPrice === "number"
+      );
+
+      if (!valid.length) {
+        return {
+          score: 0, label: "Neutral", momentumPercent: 0,
+          breadthPercentUp: 50, updatedAt: new Date().toISOString(), basketSize: 0
+        };
+      }
+
+      let total = 0, up = 0;
+      valid.forEach(c => { total += c.changePct; if (c.changePct > 0) up++; });
+
+      const avg = total / valid.length;
+      const breadth = (up / valid.length) * 100;
+      const breadthScore = ((breadth - 50) / 50) * 100;
+      const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+      const momentumScore = clamp(avg, -20, 20) * 5;
+      const score = Math.round(0.5 * breadthScore + 0.5 * momentumScore);
+
+      let label = "Neutral";
+      if (score <= -40) label = "Ice Cold";
+      else if (score <= -10) label = "Cool";
+      else if (score < 10) label = "Neutral";
+      else if (score < 40) label = "Warm";
+      else label = "On Fire";
+
+      return {
+        score, label,
+        momentumPercent: Number(avg.toFixed(2)),
+        breadthPercentUp: Number(breadth.toFixed(2)),
+        basketSize: valid.length,
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function render(containerId, data) {
+      const el = document.getElementById(containerId);
+      const {score, label, momentumPercent, breadthPercentUp, updatedAt, basketSize} = data;
+      const scoreClass = score > 5 ? "heat-score positive" :
+                         score < -5 ? "heat-score negative" : "heat-score";
+      const pct = ((Math.min(Math.max(score, -100), 100) + 100) / 2).toFixed(1);
+      const date = new Date(updatedAt);
+      const updated = date.toLocaleDateString(undefined, {month:"short", day:"numeric", year:"numeric"});
+
+      el.innerHTML = `
+        <div class="card-header">
+          <div class="title-group">
+            <div class="title">CardPulse Market Heat Index</div>
+            <div class="subtitle">Live Pokémon card sentiment tracker</div>
+          </div>
+          <div class="badge">Live</div>
+        </div>
+        <div class="heat-row">
+          <div class="heat-label">${label}</div>
+          <div class="${scoreClass}">${score}</div>
+        </div>
+        <div class="bar-container"><div class="bar-marker" style="left:${pct}%;"></div></div>
+        <div class="bar-scale"><span>Ice Cold</span><span>Neutral</span><span>On Fire</span></div>
+        <div class="metrics-row">
+          <div class="metric"><div class="metric-label">Avg 30d Move</div><div class="metric-value">${momentumPercent>0?"+":""}${momentumPercent}%</div></div>
+          <div class="metric"><div class="metric-label">Up Trend Cards</div><div class="metric-value">${breadthPercentUp}%</div></div>
+        </div>
+        <div class="footer"><span>Basket: ${basketSize} items</span><span>Updated ${updated}</span></div>
+      `;
+    }
+
+    async function init() {
+      const el = document.getElementById("heat-card");
+      el.innerHTML = "<div style='font-size:12px;color:#9ca3af;'>Loading live Pokémon market...</div>";
+      try {
+        const stats = await Promise.all(CARD_IDS.map(getCardStats));
+        const heat = calcHeat(stats);
+        render("heat-card", heat);
+      } catch (err) {
+        console.error(err);
+        el.innerHTML = "<div style='color:#ef4444;font-size:12px;'>Failed to load market data.</div>";
+      }
+    }
+
+    document.readyState === "loading"
+      ? document.addEventListener("DOMContentLoaded", init)
+      : init();
+  </script>
+</body>
+</html>
