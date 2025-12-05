@@ -3,179 +3,201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CardPulse — Pokémon Market Mood</title>
+<title>CardPulse — Pokémon Market Dashboard</title>
 <style>
   :root {
-    --fire: #f87171;
-    --warm: #facc15;
-    --neutral: #f9fafb;
-    --cool: #60a5fa;
-    --ice: #38bdf8;
-    --text-main: #f9fafb;
+    --accent: #facc15;
+    --bg1: #7f1d1d;
+    --bg2: #b91c1c;
+    --text: #f9fafb;
+    --card-bg: rgba(0,0,0,0.35);
   }
-  * {box-sizing:border-box;margin:0;padding:0;}
+  *{box-sizing:border-box;}
   body {
-    font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    background: radial-gradient(circle at top, #dc2626, #7c2d12 70%);
-    min-height:100vh;
-    color:var(--text-main);
-    display:flex;flex-direction:column;align-items:center;
-    justify-content:flex-start;padding:20px;gap:20px;
-    animation: bgpulse 15s infinite alternate;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(145deg,var(--bg1),var(--bg2));
+    color: var(--text);
+    margin: 0;
+    padding: 24px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
-  @keyframes bgpulse {
-    from {background: radial-gradient(circle at top, #dc2626, #7c2d12 70%);}
-    to {background: radial-gradient(circle at top, #f59e0b, #b45309 70%);}
+  h1 {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 28px;
+    text-shadow: 0 0 8px rgba(0,0,0,0.5);
   }
-  h1 {font-size:24px;font-weight:700;text-align:center;}
-  .cards {display:flex;flex-wrap:wrap;gap:20px;justify-content:center;width:100%;max-width:1100px;}
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    width: 100%;
+    max-width: 1100px;
+    margin-bottom: 40px;
+  }
   .card {
-    flex:1 1 300px;
-    background:rgba(0,0,0,0.3);
-    border:1px solid rgba(255,255,255,0.1);
-    border-radius:16px;
-    padding:20px;
-    box-shadow:0 0 20px rgba(0,0,0,0.4);
-    position:relative;
-    overflow:hidden;
+    flex: 1 1 300px;
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    transition: transform 0.3s, box-shadow 0.3s;
   }
-  .card::after {
-    content:"";
-    position:absolute;top:0;left:0;width:100%;height:100%;
-    background: radial-gradient(circle at top, rgba(255,255,255,0.15), transparent 70%);
-    opacity:0;transition:opacity .6s;
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 0 30px rgba(250,204,21,0.3);
   }
-  .card.pulse::after {opacity:1;}
-  .label {font-size:16px;font-weight:600;margin-bottom:6px;}
-  .score {font-size:28px;font-weight:700;}
-  .emoji {font-size:24px;margin-left:6px;}
-  .bar {
-    height:10px;border-radius:6px;margin:10px 0;
-    background:linear-gradient(90deg,#60a5fa 0%,#facc15 50%,#f87171 100%);
-    position:relative;
+  .label { font-weight: 600; font-size: 16px; margin-bottom: 6px; color: var(--accent); }
+  .score { font-size: 30px; font-weight: 700; }
+
+  .section {
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 60px;
   }
-  .marker {
-    position:absolute;top:0;width:4px;height:100%;
-    background:#fff;border-radius:2px;transform:translateX(-50%);
+  .section h2 {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: var(--accent);
+    text-shadow: 0 0 10px rgba(0,0,0,0.5);
   }
-  .metric {font-size:13px;color:#e5e7eb;margin-bottom:4px;}
-  .top-movers {width:100%;max-width:700px;background:rgba(0,0,0,0.3);padding:12px 20px;border-radius:12px;}
-  .top-movers h2 {font-size:16px;margin-bottom:8px;}
-  .mover {font-size:13px;margin-bottom:4px;}
-  .up {color:#4ade80;} .down {color:#f87171;}
-  .share-btn {
-    margin-top:10px;padding:8px 14px;
-    background:#facc15;color:#000;
-    border:none;border-radius:6px;font-weight:600;cursor:pointer;
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 18px;
   }
-  footer {font-size:10px;color:#e5e7eb;margin-top:10px;text-align:center;}
+
+  .mover {
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+    transition: transform 0.25s, box-shadow 0.25s;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  }
+  .mover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(250,204,21,0.3);
+  }
+
+  .mover img {
+    width: 90px;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.6);
+  }
+
+  .mover div {
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  .up { color: #4ade80; font-weight: 600; }
+  .down { color: #f87171; font-weight: 600; }
+
+  button.refresh {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(250,204,21,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  button.refresh:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(250,204,21,0.6);
+  }
+
+  footer {
+    font-size: 12px;
+    color: #e5e7eb;
+    margin-top: 40px;
+    text-align: center;
+    opacity: 0.8;
+  }
+
+  @media (max-width:600px){
+    .cards {flex-direction: column; align-items:center;}
+    .card {width:90%;}
+  }
 </style>
 </head>
 <body>
-  <h1>CardPulse — Pokémon Market Mood</h1>
+  <h1>CardPulse — Pokémon Market Dashboard</h1>
+
   <div class="cards">
-    <div id="card1d" class="card"></div>
-    <div id="card7d" class="card"></div>
-    <div id="card30d" class="card"></div>
+    <div class="card" id="card1d"><div class="label">1-Day Heat</div><div class="score">—</div></div>
+    <div class="card" id="card7d"><div class="label">7-Day Heat</div><div class="score">—</div></div>
+    <div class="card" id="card30d"><div class="label">30-Day Heat</div><div class="score">—</div></div>
   </div>
-  <div class="top-movers">
-    <h2>🏆 Top Movers (24h)</h2>
-    <div id="movers"></div>
+
+  <div class="section">
+    <h2>💰 Top 10 to Buy Now</h2>
+    <div id="buy-list" class="grid"></div>
   </div>
-  <button class="share-btn" id="share">📣 Share Market Mood</button>
-  <footer>Auto-refreshes every 5 minutes — Powered by CardPulse</footer>
+
+  <div class="section">
+    <h2>🔥 Top 10 to Sell Now</h2>
+    <div id="sell-list" class="grid"></div>
+  </div>
+
+  <button class="refresh" id="refresh">🔁 Refresh</button>
+  <footer>Live data via Pokémon Price Tracker API — Cached hourly by CardPulse</footer>
 
 <script>
-const PROXY = "https://cardpulse-proxy.michael-e59.workers.dev/?url=";
-const API_BASE = PROXY + "https://www.pokemonpricetracker.com";
-const CARD_IDS = ["base1-4","base1-2","base1-15","surging-sparks-booster-box","celebrations-etb"];
+const SUMMARY_URL = "https://cardpulse-proxy.michael-e59.workers.dev/summary";
 
-async function apiGet(path){
-  const res = await fetch(API_BASE + path);
-  if(!res.ok)throw new Error("API error "+res.status);
-  return res.json();
-}
-async function fetchCurrentPrice(id){
-  const d = await apiGet(`/api/prices?id=${encodeURIComponent(id)}`);
-  const m = d?.prices?.tcgplayer?.market ?? d?.prices?.cardmarket?.trend ?? null;
-  return {id,current:typeof m==="number"?m:null};
-}
-async function fetchHistory(id,days){
-  const e=new Date(),s=new Date();s.setDate(e.getDate()-days);
-  const toISO=d=>d.toISOString().slice(0,10);
-  const path=`/api/cards/${encodeURIComponent(id)}/history?startDate=${toISO(s)}&endDate=${toISO(e)}`;
-  try{return (await apiGet(path)).history||[]}catch{return[];}
-}
-function extractMarket(e){return e?.tcgplayer?.market??e?.price??null;}
-async function getCardStats(id,days){
-  const cur=await fetchCurrentPrice(id);
-  const hist=await fetchHistory(id,days);
-  let old=null,last=cur.current;
-  if(hist.length>1){
-    const first=extractMarket(hist[0]);
-    const l=extractMarket(hist[hist.length-1]);
-    old=typeof first==="number"?first:null;
-    if(typeof l==="number")last=l;
-  }
-  let pct=0;if(old&&last)pct=((last-old)/old)*100;
-  return {id,change:pct,price:cur.current};
-}
-function calcHeat(cards){
-  const valid=cards.filter(c=>!isNaN(c.change));
-  if(!valid.length)return{score:0,label:"Neutral",avg:0,breadth:0};
-  let total=0,up=0;
-  valid.forEach(c=>{total+=c.change;if(c.change>0)up++;});
-  const avg=total/valid.length,breadth=(up/valid.length)*100;
-  const score=Math.round((avg*2)+(breadth-50));
-  let label="Neutral";
-  if(score<=-40)label="Ice Cold";else if(score<=-10)label="Cool";
-  else if(score<10)label="Neutral";else if(score<40)label="Warm";else label="On Fire";
-  return{score,label,avg,breadth};
-}
-function emoji(label){
-  return label==="On Fire"?"🔥":label==="Warm"?"☀️":label==="Cool"?"❄️":label==="Ice Cold"?"🧊":"😐";
-}
-function renderCard(id,title,data){
-  const el=document.getElementById(id);
-  const cls=data.score>5?"positive":data.score<-5?"negative":"";
-  const pct=((Math.min(Math.max(data.score,-100),100)+100)/2).toFixed(1);
-  el.classList.remove("pulse");void el.offsetWidth;el.classList.add("pulse");
-  el.innerHTML=`
-    <div class="label">${title}</div>
-    <div class="score ${cls}">${data.score} ${emoji(data.label)}</div>
-    <div class="bar"><div class="marker" style="left:${pct}%"></div></div>
-    <div class="metric">Avg Move: ${data.avg.toFixed(2)}%</div>
-    <div class="metric">Cards Up: ${data.breadth.toFixed(1)}%</div>`;
-}
-async function build(){
-  try{
-    const [stats1,stats7,stats30] = await Promise.all([
-      Promise.all(CARD_IDS.map(i=>getCardStats(i,1))),
-      Promise.all(CARD_IDS.map(i=>getCardStats(i,7))),
-      Promise.all(CARD_IDS.map(i=>getCardStats(i,30)))
-    ]);
-    renderCard("card1d","🔥 1-Day Heat Index",calcHeat(stats1));
-    renderCard("card7d","📅 7-Day Heat Index",calcHeat(stats7));
-    renderCard("card30d","📈 30-Day Heat Index",calcHeat(stats30));
+async function buildDashboard() {
+  try {
+    const res = await fetch(SUMMARY_URL, { cache: "no-store" });
+    const data = await res.json();
 
-    // top movers (24h)
-    const sorted=[...stats1].sort((a,b)=>b.change-a.change);
-    const top=sorted.slice(0,3),low=sorted.slice(-3).reverse();
-    const moverDiv=document.getElementById("movers");
-    moverDiv.innerHTML=
-      top.map(c=>`<div class="mover up">⬆️ ${c.id}: +${c.change.toFixed(2)}%</div>`).join("")+
-      low.map(c=>`<div class="mover down">⬇️ ${c.id}: ${c.change.toFixed(2)}%</div>`).join("");
-  }catch(e){
-    console.error(e);
+    if (!data.market_heat) {
+      document.body.insertAdjacentHTML("beforeend","<p style='text-align:center;color:#f87171;'>Market data not ready yet — please check back soon.</p>");
+      return;
+    }
+
+    const setCard = (id,label,value)=>{
+      const el=document.getElementById(id);
+      el.querySelector(".label").textContent=label;
+      el.querySelector(".score").textContent=(value>0?"+":"")+value.toFixed(2)+"%";
+    };
+    setCard("card1d","🔥 1-Day Heat",data.market_heat["1d"]);
+    setCard("card7d","📅 7-Day Heat",data.market_heat["7d"]);
+    setCard("card30d","📈 30-Day Heat",data.market_heat["30d"]);
+
+    const gridItem=(c,type)=>`
+      <div class="mover ${type}">
+        <img src="${c.img||''}" alt="${c.name}">
+        <div>${c.name}</div>
+        <div class="${type==='up'?'up':'down'}">${c.change.toFixed(2)}%</div>
+      </div>`;
+
+    document.getElementById("buy-list").innerHTML=(data.top_buy||[]).map(c=>gridItem(c,"down")).join("");
+    document.getElementById("sell-list").innerHTML=(data.top_sell||[]).map(c=>gridItem(c,"up")).join("");
+  } catch(err) {
+    console.error(err);
+    document.body.insertAdjacentHTML("beforeend","<p style='text-align:center;color:#f87171;'>Failed to load market data.</p>");
   }
 }
-document.getElementById("share").addEventListener("click",()=>{
-  const url=encodeURIComponent(window.location.href);
-  const text=encodeURIComponent("Check out the Pokémon Market Mood on CardPulse!");
-  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`,"_blank");
-});
-build();
-setInterval(build,5*60*1000);
+
+document.getElementById("refresh").addEventListener("click",buildDashboard);
+buildDashboard();
+setInterval(buildDashboard,5*60*1000);
 </script>
 </body>
 </html>
